@@ -1,4 +1,4 @@
-const posts = [
+let posts = [
   { title:'The Trap of Pushing Harder', date:'Apr 25, 2026', read:'1 min read', tags:['Personal Thoughts'], slug:'the-trap-of-pushing-harder', excerpt:'Every crossroads came with the same two instructions: act now or do nothing. When I was younger I always reached for action. Move first, think later.', body:['Every crossroads came with the same two instructions: act now or do nothing. When I was younger I always reached for action. Move first, think later. But the older I got the more mentors would tell me to wait. Let things play out.','There is a difference between patience and passivity. The hard part is learning which one you are practicing.'] },
   { title:'Doing More with Less', date:'Feb 16, 2026', read:'2 min read', tags:['Lifestyle','Personal Thoughts'], slug:'doing-more-with-less', excerpt:'As I approach 30 I keep thinking about how little time we actually have. It is not the first time the thought has crossed my mind.', body:['As I approach 30 I keep thinking about how little time we actually have. I remember reading On the Shortness of Life by Seneca years ago and feeling that same punch in the chest.','The useful question is not how to fit more into the day. It is what deserves the day in the first place.'] },
   { title:'The Gray Between Linear and Exponential Games', date:'Mar 2, 2025', read:'1 min read', tags:['Entrepreneurship','Personal Thoughts'], slug:'the-gray-between-linear-and-exponential-games', excerpt:'This year, I am changing the way I view the world and the probabilities I assign to outcomes.', body:['This year, I am venturing to change the way I view the world and the probabilities I assign to outcomes. This shift was driven by my recent re-reading of several of Nassim Taleb’s books.','Those who achieve success beyond the average person tend to play games that yield exponential returns. My goal is to find a middle ground: smaller sacrifices in pursuit of more attainable 10x gains.','At Vitrix Health, I chose to pursue a venture-backed startup — an exponential game. Now I am looking for problems that impact a medium-sized group of people, without the urgency of a moonshot.'] },
@@ -11,7 +11,7 @@ const posts = [
 ];
 
 const app = document.querySelector('#app');
-const allTags = [...new Set(posts.flatMap(p => p.tags))];
+let allTags = [...new Set(posts.flatMap(p => p.tags))];
 const esc = (s) => s.replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[c]));
 let agentMode = false;
 try { agentMode = localStorage.getItem('qn-mode') === 'agent'; } catch {}
@@ -51,8 +51,20 @@ function home() {
 }
 function detail(slug) {
   const p = posts.find(x=>x.slug===slug) || posts[0];
-  app.innerHTML = `<article class="detail"><a class="back" href="#/">← All writing</a><p class="eyebrow">${p.tags.join(' / ')}</p><h1>${esc(p.title)}</h1><p class="post-meta">${p.date} · ${p.read}</p><p class="lead">${esc(p.excerpt)}</p><div class="article-copy">${p.body.map((x,i)=>i===1&&p.body.length>2?`<blockquote>${esc(x)}</blockquote>`:`<p>${esc(x)}</p>`).join('')}<p class="mono">More from the archive → <a href="#/">Read another essay</a></p></div></article>`;
+  const fallback = (p.body || []).map((x,i)=>i===1&&p.body.length>2?`<blockquote>${esc(x)}</blockquote>`:`<p>${esc(x)}</p>`).join('');
+  app.innerHTML = `<article class="detail"><a class="back" href="#/">← All writing</a><p class="eyebrow">${p.tags.join(' / ')}</p><h1>${esc(p.title)}</h1><p class="post-meta">${p.date} · ${p.read}</p><p class="lead">${esc(p.excerpt)}</p><div class="article-copy">${p.content || fallback}<p class="mono">More from the archive → <a href="#/">Read another essay</a></p></div></article>`;
 }
 function about() { app.innerHTML = `<section class="about"><a class="back" href="#/">← All writing</a><p class="eyebrow">About the author</p><h1>Curious by default.</h1><div class="about-copy"><p>I’m Ayush Kumar, an entrepreneur and engineer interested in the space between technology and real life.</p><p>I write about startups, machine learning, health, and the mental models that help me navigate them. This is a living archive, not a publication with a fixed point of view.</p><p><a class="nav-pill" href="mailto:ayushkumar0630@gmail.com">Say hello ↗</a></p></div></section>`; }
 function render() { const path = location.hash.replace(/^#\/?/, ''); if(path==='about') about(); else if(path.startsWith('post/')) detail(path.slice(5)); else home(); bindModeToggle(); window.scrollTo(0,0); }
-window.addEventListener('hashchange', render); render();
+async function loadPosts() {
+  try {
+    const response = await fetch('/posts.json');
+    if (!response.ok) throw new Error(`posts.json returned ${response.status}`);
+    posts = await response.json();
+    allTags = [...new Set(posts.flatMap(p => p.tags))];
+    render();
+  } catch (error) {
+    console.warn('Using the embedded archive fallback:', error);
+  }
+}
+window.addEventListener('hashchange', render); render(); loadPosts();

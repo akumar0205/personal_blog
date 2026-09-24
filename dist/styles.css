@@ -61,6 +61,14 @@ h1 { max-width:840px; margin-bottom:28px; font-family:'Instrument Serif',serif; 
 .detail .article-copy { border-top:1px solid var(--ink); margin-top:42px; padding-top:34px; max-width:680px; }
 .article-copy p { font-size:18px; line-height:1.72; margin-bottom:26px; }
 .article-copy h2 { font:38px/1 'Instrument Serif',serif; margin:48px 0 18px; }
+.article-copy h3 { font:30px/1.1 'Instrument Serif',serif; margin:42px 0 16px; }
+.article-copy ul, .article-copy ol { padding-left:24px; margin:22px 0 30px; }
+.article-copy li { margin:9px 0; font-size:17px; }
+.article-copy figure { margin:32px 0; }
+.article-copy img { display:block; max-width:100%; height:auto; margin:0 auto; border:1px solid rgba(246,229,189,.22); }
+.article-copy figcaption { margin-top:9px; color:var(--muted); text-align:center; font:12px/1.5 'DM Mono',monospace; }
+.article-copy .wp-block-gallery ul { list-style:none; display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:14px; padding:0; }
+.article-copy .wp-block-gallery li { margin:0; }
 .article-copy blockquote { margin:34px 0; padding:18px 22px; border-left:3px solid var(--red); font:24px/1.3 'Instrument Serif',serif; }
 .about h1 { font-size:clamp(60px,9vw,105px); }
 .about-copy { max-width:650px; font-size:21px; line-height:1.5; }
