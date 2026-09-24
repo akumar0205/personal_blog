@@ -12,6 +12,10 @@ nav a:not(.nav-pill) { color:var(--muted); }
 nav a:not(.nav-pill):hover, .site-footer a:hover { color:var(--red); }
 .nav-pill { padding:9px 15px; border:1px solid var(--ink); border-radius:99px; transition:.2s ease; }
 .nav-pill:hover { background:var(--ink); color:var(--paper); }
+.mode-toggle { display:inline-flex; align-items:center; gap:7px; padding:8px 11px; border:1px solid var(--line); border-radius:99px; background:transparent; color:var(--muted); cursor:pointer; font:12px 'DM Mono',monospace; transition:.2s ease; }
+.mode-toggle:hover, .mode-toggle[aria-pressed="true"] { border-color:var(--yellow); color:var(--ink); }
+.mode-dot { width:8px; height:8px; border-radius:50%; background:var(--red); display:inline-block; }
+.mode-toggle[aria-pressed="true"] .mode-dot { background:var(--teal); box-shadow:0 0 0 3px rgba(39,122,131,.2); }
 .hero { max-width:1180px; margin:0 auto; padding:82px 28px 74px; display:grid; grid-template-columns:minmax(0, 1fr) 310px; gap:60px; border:1px solid rgba(246,229,189,.42); background:linear-gradient(128deg, rgba(34,36,78,.92), rgba(22,20,45,.78)); box-shadow:inset 0 0 0 8px rgba(215,166,41,.06); }
 .eyebrow, .kicker, .post-meta, .tag, .mono { font-family:'DM Mono',monospace; font-size:11px; letter-spacing:.04em; text-transform:uppercase; }
 .eyebrow { color:var(--yellow); margin:0 0 20px; }
@@ -38,6 +42,10 @@ h1 { max-width:840px; margin-bottom:28px; font-family:'Instrument Serif',serif; 
 .post-side { color:var(--muted); font:11px 'DM Mono',monospace; text-transform:uppercase; line-height:1.5; padding-top:5px; }
 .post-side span { display:block; margin-bottom:6px; }
 .post-side .read { color:var(--ink); margin-top:18px; }
+.agent-mode .hero { border-color:var(--teal); }
+.agent-mode .hero .eyebrow { color:var(--teal); }
+.agent-mode .post-title { font-family:'DM Sans',sans-serif; font-size:29px; font-weight:600; letter-spacing:-.04em; }
+.agent-mode .post-excerpt { font:14px/1.6 'DM Mono',monospace; }
 .detail, .about { max-width:850px; margin:0 auto; padding:80px 28px 100px; }
 .back { display:inline-block; margin-bottom:48px; color:var(--blue); font:12px 'DM Mono',monospace; text-transform:uppercase; }
 .detail h1 { font-size:clamp(54px,8vw,94px); max-width:800px; margin-bottom:20px; }
