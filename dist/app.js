@@ -46,9 +46,38 @@ function home() {
     app.innerHTML = `${hero}<section class="archive">${archiveHeading}<div class="post-list">${visible.map((p,i)=>`<article class="post-row"><div class="post-number">${String(i+1).padStart(2,'0')}</div><div><h3 class="post-title"><a href="#/post/${p.slug}">${esc(p.title)}</a></h3><p class="post-excerpt">${esc(p.excerpt)}</p></div><div class="post-side"><span>${p.date}</span><span>${p.read}</span><span class="read"><a href="#/post/${p.slug}">Read essay ↗</a></span></div></article>`).join('')}</div></section>`;
   }
 }
+function htmlToMarkdown(html) {
+  const root = new DOMParser().parseFromString(`<div>${html}</div>`, 'text/html').body.firstElementChild;
+  const convert = node => {
+    if (node.nodeType === Node.TEXT_NODE) return node.textContent.replace(/\s+/g, ' ');
+    if (node.nodeType !== Node.ELEMENT_NODE) return '';
+    const tag = node.tagName.toLowerCase();
+    if (tag === 'pre') return `\n\n\`\`\`\n${node.textContent.trim()}\n\`\`\`\n\n`;
+    if (tag === 'img') return `\n\n![${node.getAttribute('alt') || ''}](${node.getAttribute('src') || ''})\n\n`;
+    const inner = [...node.childNodes].map(convert).join('');
+    if (/^h[1-6]$/.test(tag)) return `\n\n${'#'.repeat(Number(tag[1]))} ${inner.trim()}\n\n`;
+    if (tag === 'p') return `\n\n${inner.trim()}\n\n`;
+    if (tag === 'blockquote') return `\n\n${inner.trim().split('\n').filter(Boolean).map(line => `> ${line}`).join('\n')}\n\n`;
+    if (tag === 'li') return inner.trim();
+    if (tag === 'ul' || tag === 'ol') return `\n\n${[...node.children].map((item, i) => `${tag === 'ol' ? `${i + 1}.` : '-'} ${convert(item)}`).join('\n')}\n\n`;
+    if (tag === 'strong' || tag === 'b') return `**${inner.trim()}**`;
+    if (tag === 'em' || tag === 'i') return `*${inner.trim()}*`;
+    if (tag === 'a') return `[${inner.trim()}](${node.getAttribute('href') || ''})`;
+    if (tag === 'br') return '\n';
+    if (tag === 'figcaption' || tag === 'cite') return `\n\n*${inner.trim()}*\n\n`;
+    if (tag === 'code') return `\`${inner.trim()}\``;
+    return inner;
+  };
+  return convert(root).replace(/\n{3,}/g, '\n\n').trim();
+}
 function detail(slug) {
   const p = posts.find(x=>x.slug===slug) || posts[0];
   const fallback = (p.body || []).map((x,i)=>i===1&&p.body.length>2?`<blockquote>${esc(x)}</blockquote>`:`<p>${esc(x)}</p>`).join('');
+  if (agentMode) {
+    const markdown = htmlToMarkdown(p.content || fallback);
+    app.innerHTML = `<article class="detail agent-detail"><a class="back" href="#/">← All writing</a><pre class="agent-markdown agent-post-markdown"><code># ${esc(p.title)}\n\n- published: ${esc(p.date)}\n- read: ${esc(p.read)}\n\n> ${esc(p.excerpt)}\n\n${esc(markdown)}</code></pre></article>`;
+    return;
+  }
   app.innerHTML = `<article class="detail"><a class="back" href="#/">← All writing</a><p class="eyebrow">Essay</p><h1>${esc(p.title)}</h1><p class="post-meta">${p.date} · ${p.read}</p><p class="lead">${esc(p.excerpt)}</p><div class="article-copy">${p.content || fallback}<p class="mono">More from the archive → <a href="#/">Read another essay</a></p></div></article>`;
 }
 function about() { app.innerHTML = `<section class="about"><a class="back" href="#/">← All writing</a><p class="eyebrow">About the author</p><h1>Curious by default.</h1><div class="about-copy"><p>I’m Ayush Kumar, an entrepreneur and engineer interested in the space between technology and real life.</p><p>I write about startups, machine learning, health, and the mental models that help me navigate them. This is a living archive, not a publication with a fixed point of view.</p><p><a class="nav-pill" href="mailto:ayushkumar0630@gmail.com">Say hello ↗</a></p></div></section>`; }

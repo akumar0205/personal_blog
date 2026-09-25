@@ -54,6 +54,10 @@ h1 { max-width:840px; margin-bottom:28px; font-family:'Instrument Serif',serif; 
 .agent-markdown .md-h3 { margin-bottom:3px; }
 .agent-markdown .md-entry { margin:0 0 25px; }
 .agent-markdown .md-quote { color:var(--muted); margin-top:7px; }
+.agent-detail .back { margin-bottom:26px; }
+pre.agent-markdown { white-space:pre-wrap; overflow-wrap:anywhere; }
+pre.agent-markdown code { font:inherit; white-space:inherit; }
+.agent-post-markdown { margin-top:0; color:var(--muted); }
 .detail, .about { max-width:850px; margin:0 auto; padding:80px 28px 100px; }
 .back { display:inline-block; margin-bottom:48px; color:var(--blue); font:12px 'DM Mono',monospace; text-transform:uppercase; }
 .detail h1 { font-size:clamp(54px,8vw,94px); max-width:800px; margin-bottom:20px; }
