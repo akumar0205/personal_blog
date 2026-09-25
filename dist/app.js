@@ -11,7 +11,6 @@ let posts = [
 ];
 
 const app = document.querySelector('#app');
-let allTags = [...new Set(posts.flatMap(p => p.tags))];
 const esc = (s) => s.replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[c]));
 let agentMode = false;
 try { agentMode = localStorage.getItem('qn-mode') === 'agent'; } catch {}
@@ -37,22 +36,20 @@ function bindModeToggle() {
 }
 
 function home() {
-  const tag = new URLSearchParams(location.hash.split('?')[1] || '').get('tag');
-  const visible = tag ? posts.filter(p => p.tags.includes(tag)) : posts;
+  const visible = posts;
   const hero = `<section class="hero"><div><p class="eyebrow">${agentMode ? 'System notes / 2020—2026' : 'Field notes / 2020—2026'}</p><h1>${agentMode ? 'Signal in context.' : 'Learning in public.'}</h1><p class="hero-intro">${agentMode ? 'A compact index of decisions, experiments, and observations from building in public.' : 'A collection of essays on building companies, making sense of technology, and trying to live a little more deliberately.'}</p></div><aside class="hero-note"><strong>${agentMode ? 'Context in. Curiosity out.' : 'Good ideas travel well.'}</strong><span>${agentMode ? 'Structured notes from Ayush Kumar, for humans and machines.' : 'Thoughts from Ayush Kumar, an entrepreneur and engineer.'}</span></aside></section>`;
-  const filters = `<div class="archive-top"><h2>All writing <span class="mono">(${visible.length})</span></h2><div class="filters"><button class="filter ${!tag?'active':''}" data-tag="">All</button>${allTags.map(t=>`<button class="filter ${tag===t?'active':''}" data-tag="${esc(t)}">${esc(t)}</button>`).join('')}</div></div>`;
+  const archiveHeading = `<div class="archive-top"><h2>All writing <span class="mono">(${visible.length})</span></h2></div>`;
   if (agentMode) {
-    const markdown = visible.map(p => `<div class="md-entry"><div class="md-h3">### <a href="#/post/${p.slug}">[${esc(p.title)}](#/post/${p.slug})</a></div><div>- published: ${esc(p.date)}</div><div>- read: ${esc(p.read)}</div><div>- tags: ${esc(p.tags.join(', '))}</div><div class="md-quote">&gt; ${esc(p.excerpt)}</div></div>`).join('');
-    app.innerHTML = `${hero}<section class="archive agent-archive">${filters}<div class="agent-markdown"><div class="md-h1"># Quixotic Nomad</div><div class="md-quote">&gt; Notes on building, technology, health, and living deliberately.</div><div class="md-h2">## Essays (${visible.length})</div>${markdown}</div></section>`;
+    const markdown = visible.map(p => `<div class="md-entry"><div class="md-h3">### <a href="#/post/${p.slug}">[${esc(p.title)}](#/post/${p.slug})</a></div><div>- published: ${esc(p.date)}</div><div>- read: ${esc(p.read)}</div><div class="md-quote">&gt; ${esc(p.excerpt)}</div></div>`).join('');
+    app.innerHTML = `${hero}<section class="archive agent-archive">${archiveHeading}<div class="agent-markdown"><div class="md-h1"># Quixotic Nomad</div><div class="md-quote">&gt; Notes on building, technology, health, and living deliberately.</div><div class="md-h2">## Essays (${visible.length})</div>${markdown}</div></section>`;
   } else {
-    app.innerHTML = `${hero}<section class="archive">${filters}<div class="post-list">${visible.map((p,i)=>`<article class="post-row"><div class="post-number">${String(i+1).padStart(2,'0')}</div><div><h3 class="post-title"><a href="#/post/${p.slug}">${esc(p.title)}</a></h3><p class="post-excerpt">${esc(p.excerpt)}</p></div><div class="post-side"><span>${p.date}</span><span>${p.read}</span><span>${p.tags.join(' · ')}</span><span class="read"><a href="#/post/${p.slug}">Read essay ↗</a></span></div></article>`).join('')}</div></section>`;
+    app.innerHTML = `${hero}<section class="archive">${archiveHeading}<div class="post-list">${visible.map((p,i)=>`<article class="post-row"><div class="post-number">${String(i+1).padStart(2,'0')}</div><div><h3 class="post-title"><a href="#/post/${p.slug}">${esc(p.title)}</a></h3><p class="post-excerpt">${esc(p.excerpt)}</p></div><div class="post-side"><span>${p.date}</span><span>${p.read}</span><span class="read"><a href="#/post/${p.slug}">Read essay ↗</a></span></div></article>`).join('')}</div></section>`;
   }
-  document.querySelectorAll('.filter').forEach(b=>b.addEventListener('click',()=>location.hash = b.dataset.tag ? `/?tag=${encodeURIComponent(b.dataset.tag)}` : '/'));
 }
 function detail(slug) {
   const p = posts.find(x=>x.slug===slug) || posts[0];
   const fallback = (p.body || []).map((x,i)=>i===1&&p.body.length>2?`<blockquote>${esc(x)}</blockquote>`:`<p>${esc(x)}</p>`).join('');
-  app.innerHTML = `<article class="detail"><a class="back" href="#/">← All writing</a><p class="eyebrow">${p.tags.join(' / ')}</p><h1>${esc(p.title)}</h1><p class="post-meta">${p.date} · ${p.read}</p><p class="lead">${esc(p.excerpt)}</p><div class="article-copy">${p.content || fallback}<p class="mono">More from the archive → <a href="#/">Read another essay</a></p></div></article>`;
+  app.innerHTML = `<article class="detail"><a class="back" href="#/">← All writing</a><p class="eyebrow">Essay</p><h1>${esc(p.title)}</h1><p class="post-meta">${p.date} · ${p.read}</p><p class="lead">${esc(p.excerpt)}</p><div class="article-copy">${p.content || fallback}<p class="mono">More from the archive → <a href="#/">Read another essay</a></p></div></article>`;
 }
 function about() { app.innerHTML = `<section class="about"><a class="back" href="#/">← All writing</a><p class="eyebrow">About the author</p><h1>Curious by default.</h1><div class="about-copy"><p>I’m Ayush Kumar, an entrepreneur and engineer interested in the space between technology and real life.</p><p>I write about startups, machine learning, health, and the mental models that help me navigate them. This is a living archive, not a publication with a fixed point of view.</p><p><a class="nav-pill" href="mailto:ayushkumar0630@gmail.com">Say hello ↗</a></p></div></section>`; }
 function render() { const path = location.hash.replace(/^#\/?/, ''); if(path==='about') about(); else if(path.startsWith('post/')) detail(path.slice(5)); else home(); bindModeToggle(); window.scrollTo(0,0); }
@@ -61,7 +58,6 @@ async function loadPosts() {
     const response = await fetch('/posts.json');
     if (!response.ok) throw new Error(`posts.json returned ${response.status}`);
     posts = await response.json();
-    allTags = [...new Set(posts.flatMap(p => p.tags))];
     render();
   } catch (error) {
     console.warn('Using the embedded archive fallback:', error);
