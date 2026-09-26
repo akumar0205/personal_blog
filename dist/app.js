@@ -90,10 +90,10 @@ function about() {
   ];
   if (agentMode) {
     const markdown = bio.map(text => `\n\n${text}`).join('');
-    app.innerHTML = `<section class="about agent-detail"><a class="back" href="#/">← All writing</a><pre class="agent-markdown agent-post-markdown"><code># Who Am I?\n\n![Ayush Kumar](/assets/ayush-about.jpg)\n\n## Ayush Kumar\n\n### Always Curious${esc(markdown)}\n\n[me@ayushkumar.xyz](mailto:me@ayushkumar.xyz)</code></pre></section>`;
+    app.innerHTML = `<section class="about agent-detail"><a class="back" href="#/">← All writing</a><pre class="agent-markdown agent-post-markdown"><code># Who Am I?\n\n![Ayush Kumar](/assets/ayush-about-indigo.png)\n\n## Ayush Kumar\n\n### Always Curious${esc(markdown)}\n\n[me@ayushkumar.xyz](mailto:me@ayushkumar.xyz)</code></pre></section>`;
     return;
   }
-  app.innerHTML = `<section class="about"><a class="back" href="#/">← All writing</a><p class="eyebrow">Who Am I?</p><div class="about-profile"><img class="about-portrait" src="/assets/ayush-about.jpg" alt="Ayush Kumar" /><div class="about-copy"><h1>Ayush Kumar</h1><p class="about-subtitle">Always Curious</p>${bio.map(text=>`<p>${esc(text)}</p>`).join('')}<p><a class="about-email" href="mailto:me@ayushkumar.xyz">me@ayushkumar.xyz ↗</a></p></div></div></section>`;
+  app.innerHTML = `<section class="about"><a class="back" href="#/">← All writing</a><p class="eyebrow">Who Am I?</p><div class="about-profile"><img class="about-portrait" src="/assets/ayush-about-indigo.png" alt="Ayush Kumar" /><div class="about-copy"><h1>Ayush Kumar</h1><p class="about-subtitle">Always Curious</p>${bio.map(text=>`<p>${esc(text)}</p>`).join('')}<p><a class="about-email" href="mailto:me@ayushkumar.xyz">me@ayushkumar.xyz ↗</a></p></div></div></section>`;
 }
 function render() { const path = location.hash.replace(/^#\/?/, ''); if(path==='about') about(); else if(path.startsWith('post/')) detail(path.slice(5)); else home(); bindModeToggle(); window.scrollTo(0,0); }
 async function loadPosts() {
