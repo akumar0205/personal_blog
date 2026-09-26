@@ -80,7 +80,21 @@ function detail(slug) {
   }
   app.innerHTML = `<article class="detail"><a class="back" href="#/">← All writing</a><p class="eyebrow">Essay</p><h1>${esc(p.title)}</h1><p class="post-meta">${p.date} · ${p.read}</p><p class="lead">${esc(p.excerpt)}</p><div class="article-copy">${p.content || fallback}<p class="mono">More from the archive → <a href="#/">Read another essay</a></p></div></article>`;
 }
-function about() { app.innerHTML = `<section class="about"><a class="back" href="#/">← All writing</a><p class="eyebrow">About the author</p><h1>Curious by default.</h1><div class="about-copy"><p>I’m Ayush Kumar, an entrepreneur and engineer interested in the space between technology and real life.</p><p>I write about startups, machine learning, health, and the mental models that help me navigate them. This is a living archive, not a publication with a fixed point of view.</p><p><a class="nav-pill" href="mailto:ayushkumar0630@gmail.com">Say hello ↗</a></p></div></section>`; }
+function about() {
+  const bio = [
+    'I have always been drawn to the intersection of technology, business, and impact. I started my journey at the University of Illinois at Urbana-Champaign, where I studied computer science but found myself spending more and more time in the College of Business. I became fascinated with using code to solve real problems, which led me to work with early-stage startups, run a startup consulting group (EntreCORPS), and spend time at a venture capital firm (IllinoisVENTURES) evaluating new ideas.',
+    'After graduation, I briefly went into consulting before leaving it behind to build my startup full time: Orali Health (formerly Vitrix Health). Our mission was to expand access to quality oral healthcare by using machine learning to allow any minimally trained medical professional to screen for oral diseases and intelligently triage patients.',
+    'We were accepted into top accelerators, from HAX, where we lived in Shenzhen to prototype hardware and build a supply chain, to Health Wildcatters, where we deployed our platform across clinics around the world. I had the chance to collaborate with some incredible people, including the Dean of Harvard Dental and the Medical Informatics Director at NASA, while traveling across China, India, Hong Kong, and Macau. One of our proudest milestones was winning 1st place at AIMed for our AI models.',
+    'Today, I am a Principal Product Manager at Cloudflare, focusing on cyber security and applied machine learning, where I help build products that protect millions of users and organizations. I also recently completed my Master’s in Computer Science at the University of Texas at Austin, which strengthened my foundation in AI and security.',
+    'Outside of work, I am an avid reader, a machine learning enthusiast, and someone who is always looking for new things to learn. If you ever want to chat, feel free to reach out!'
+  ];
+  if (agentMode) {
+    const markdown = bio.map(text => `\n\n${text}`).join('');
+    app.innerHTML = `<section class="about agent-detail"><a class="back" href="#/">← All writing</a><pre class="agent-markdown agent-post-markdown"><code># Who Am I?\n\n![Ayush Kumar](/assets/ayush-about.jpg)\n\n## Ayush Kumar\n\n### Always Curious${esc(markdown)}\n\n[me@ayushkumar.xyz](mailto:me@ayushkumar.xyz)</code></pre></section>`;
+    return;
+  }
+  app.innerHTML = `<section class="about"><a class="back" href="#/">← All writing</a><p class="eyebrow">Who Am I?</p><div class="about-profile"><img class="about-portrait" src="/assets/ayush-about.jpg" alt="Ayush Kumar" /><div class="about-copy"><h1>Ayush Kumar</h1><p class="about-subtitle">Always Curious</p>${bio.map(text=>`<p>${esc(text)}</p>`).join('')}<p><a class="about-email" href="mailto:me@ayushkumar.xyz">me@ayushkumar.xyz ↗</a></p></div></div></section>`;
+}
 function render() { const path = location.hash.replace(/^#\/?/, ''); if(path==='about') about(); else if(path.startsWith('post/')) detail(path.slice(5)); else home(); bindModeToggle(); window.scrollTo(0,0); }
 async function loadPosts() {
   try {
