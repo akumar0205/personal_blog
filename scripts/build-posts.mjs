@@ -1,4 +1,5 @@
 import { readdir, readFile, writeFile } from 'node:fs/promises';
+import { createHash } from 'node:crypto';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -45,4 +46,15 @@ for (const file of files) {
 }
 posts.sort((a, b) => Date.parse(b.date) - Date.parse(a.date));
 await writeFile(output, `${JSON.stringify(posts, null, 2)}\n`);
-console.log(`Built ${posts.length} posts from Markdown into dist/posts.json`);
+const indexPath = path.join(root, 'dist', 'index.html');
+let index = await readFile(indexPath, 'utf8');
+for (const [file, attribute, pattern] of [
+  ['app.js', 'src', /src="\/app\.js(?:\?[^\"]*)?"/],
+  ['styles.css', 'href', /href="\/styles\.css(?:\?[^\"]*)?"/],
+]) {
+  const content = await readFile(path.join(root, 'dist', file));
+  const version = createHash('sha256').update(content).digest('hex').slice(0, 12);
+  index = index.replace(pattern, `${attribute}="/${file}?v=${version}"`);
+}
+await writeFile(indexPath, index);
+console.log(`Built ${posts.length} Markdown posts and fingerprinted site assets`);
