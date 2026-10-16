@@ -70,15 +70,76 @@ function htmlToMarkdown(html) {
   };
   return convert(root).replace(/\n{3,}/g, '\n\n').trim();
 }
+function markdownInline(text) {
+  const tokens = [];
+  const hold = value => `\u0000${tokens.push(value) - 1}\u0000`;
+  let value = text.replace(/`([^`]+)`/g, (_, code) => hold(`<code>${esc(code)}</code>`));
+  value = value.replace(/!\[([^\]]*)\]\(([^)]+)\)/g, (_, alt, src) => hold(`<img loading="lazy" src="${esc(src)}" alt="${esc(alt)}" />`));
+  value = value.replace(/\[([^\]]+)\]\(([^)]+)\)/g, (_, label, href) => hold(`<a href="${esc(href)}">${esc(label)}</a>`));
+  value = esc(value)
+    .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+    .replace(/__(.+?)__/g, '<strong>$1</strong>')
+    .replace(/\*(.+?)\*/g, '<em>$1</em>')
+    .replace(/_(.+?)_/g, '<em>$1</em>')
+    .replace(/&lt;u&gt;(.+?)&lt;\/u&gt;/g, '<u>$1</u>')
+    .replace(/\n/g, '<br>');
+  return value.replace(/\u0000(\d+)\u0000/g, (_, index) => tokens[Number(index)]);
+}
+function markdownToHtml(markdown) {
+  const lines = markdown.replace(/\r/g, '').split('\n');
+  const blocks = [];
+  let paragraph = [];
+  let list = null;
+  const flushParagraph = () => {
+    if (paragraph.length) blocks.push(`<p>${markdownInline(paragraph.join('\n'))}</p>`);
+    paragraph = [];
+  };
+  const flushList = () => {
+    if (list) blocks.push(`<${list.type}>${list.items.map(item => `<li>${markdownInline(item)}</li>`).join('')}</${list.type}>`);
+    list = null;
+  };
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i];
+    const trimmed = line.trim();
+    if (!trimmed) { flushParagraph(); flushList(); continue; }
+    if (trimmed.startsWith('```')) {
+      flushParagraph(); flushList();
+      const code = [];
+      while (++i < lines.length && !lines[i].trim().startsWith('```')) code.push(lines[i]);
+      blocks.push(`<pre><code>${esc(code.join('\n'))}</code></pre>`);
+      continue;
+    }
+    const heading = trimmed.match(/^(#{1,6})\s+(.+)$/);
+    if (heading) { flushParagraph(); flushList(); const n = heading[1].length; blocks.push(`<h${n}>${markdownInline(heading[2])}</h${n}>`); continue; }
+    if (/^(---+|\*\*\*+|___+)$/.test(trimmed)) { flushParagraph(); flushList(); blocks.push('<hr>'); continue; }
+    if (/^>\s?/.test(trimmed)) {
+      flushParagraph(); flushList();
+      const quote = [trimmed.replace(/^>\s?/, '')];
+      while (i + 1 < lines.length && /^\s*>/.test(lines[i + 1])) quote.push(lines[++i].trim().replace(/^>\s?/, ''));
+      blocks.push(`<blockquote><p>${markdownInline(quote.join('\n'))}</p></blockquote>`); continue;
+    }
+    const item = trimmed.match(/^(?:[-*+]\s+|\d+\.\s+)(.*)$/);
+    if (item) {
+      flushParagraph();
+      const type = /^\d+\./.test(trimmed) ? 'ol' : 'ul';
+      if (list && list.type !== type) flushList();
+      if (!list) list = { type, items: [] };
+      list.items.push(item[1]); continue;
+    }
+    flushList(); paragraph.push(line);
+  }
+  flushParagraph(); flushList();
+  return blocks.join('\n');
+}
 function detail(slug) {
   const p = posts.find(x=>x.slug===slug) || posts[0];
   const fallback = (p.body || []).map((x,i)=>i===1&&p.body.length>2?`<blockquote>${esc(x)}</blockquote>`:`<p>${esc(x)}</p>`).join('');
   if (agentMode) {
-    const markdown = htmlToMarkdown(p.content || fallback);
+    const markdown = p.content || htmlToMarkdown(fallback);
     app.innerHTML = `<article class="detail agent-detail"><a class="back" href="#/">← All writing</a><pre class="agent-markdown agent-post-markdown"><code># ${esc(p.title)}\n\n- published: ${esc(p.date)}\n- read: ${esc(p.read)}\n\n> ${esc(p.excerpt)}\n\n${esc(markdown)}</code></pre></article>`;
     return;
   }
-  app.innerHTML = `<article class="detail"><a class="back" href="#/">← All writing</a><p class="eyebrow">Essay</p><h1>${esc(p.title)}</h1><p class="post-meta">${p.date} · ${p.read}</p><p class="lead">${esc(p.excerpt)}</p><div class="article-copy">${p.content || fallback}<p class="mono">More from the archive → <a href="#/">Read another essay</a></p></div></article>`;
+  app.innerHTML = `<article class="detail"><a class="back" href="#/">← All writing</a><p class="eyebrow">Essay</p><h1>${esc(p.title)}</h1><p class="post-meta">${p.date} · ${p.read}</p><p class="lead">${esc(p.excerpt)}</p><div class="article-copy">${p.content ? markdownToHtml(p.content) : fallback}<p class="mono">More from the archive → <a href="#/">Read another essay</a></p></div></article>`;
 }
 function about() {
   const bio = [

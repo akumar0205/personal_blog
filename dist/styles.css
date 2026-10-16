@@ -69,6 +69,7 @@ pre.agent-markdown code { font:inherit; white-space:inherit; }
 .article-copy p { font-size:18px; line-height:1.72; margin:0 0 26px; }
 .article-copy h2 { font:38px/1 'Instrument Serif',serif; margin:48px 0 18px; }
 .article-copy h3 { font:30px/1.1 'Instrument Serif',serif; margin:42px 0 16px; }
+.article-copy h4, .article-copy h5, .article-copy h6 { font:24px/1.15 'Instrument Serif',serif; margin:34px 0 14px; }
 .article-copy ul, .article-copy ol { padding-left:24px; margin:22px 0 30px; }
 .article-copy li { margin:9px 0; font-size:17px; }
 .article-copy pre { margin:28px 0; padding:18px 20px; overflow:auto; white-space:pre-wrap; overflow-wrap:anywhere; background:rgba(0,0,0,.2); border:1px solid var(--line); color:var(--ink); font:14px/1.65 'DM Mono',monospace; }
